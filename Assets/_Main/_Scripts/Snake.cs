@@ -4,6 +4,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.InputSystem;
+using Photon.Pun;
+using Photon.Realtime;
+using ExitGames.Client.Photon;
 
 public class Snake : MonoBehaviour
 {
@@ -12,89 +15,98 @@ public class Snake : MonoBehaviour
     [SerializeField] float snakSpeed;
     [SerializeField] GameObject snakeBodyPrefab;
 
-    [Header("Food config")]
-    [Tooltip("x: min and y: max")]
-    [SerializeField] Vector2 LevelRange_x;
-    [SerializeField] Vector2 LevelRange_y;
-
 
     [HideInInspector]
     public UnityEvent onHitDanger;
     public UnityEvent onFoodEat;
+    public UnityEvent<PhotonView> onFoodEat_m;
+
     
+    public bool isMultiplayer = true;
+
     List<GameObject> parts = new List<GameObject>();
     GameObject food;
     SnakeInputs input;
     Transform lastAddedBodyPart;
     Vector3 nextRotation;
+    PhotonView photonView;
+    Direction currentDirection = Direction.Right;
+
+    
 
     private void Awake() {
         food = GameObject.Find("Food");
+        photonView = GetComponent<PhotonView>();
+        lastAddedBodyPart = this.transform;
     }
 
     private void Start() {
 
-        //Starting direction of snake
-        snakeDirection = transform.right;
+        int rot = (int)transform.eulerAngles.z;
+
+        if(rot == 0){
+            Debug.Log("Right");
+            currentDirection = Direction.Right;
+        }
+        else if (rot == 90){
+            Debug.Log("UP");
+            currentDirection = Direction.Up;
+        }
+        else if (rot == 180){
+            Debug.Log("left");
+            currentDirection = Direction.Left;
+        }
+        else if (rot == 270){
+            Debug.Log("Down");
+            currentDirection = Direction.Down;
+        }
+
+        nextRotation = transform.eulerAngles;
+        
 
         input = new SnakeInputs();
         input.Snake.Enable();
         
-        input.Snake.Joystick.performed += OnInputChange;
+        input.Snake.Up.performed += OnUp;
+        input.Snake.Down.performed += OnDown;
+        input.Snake.Left.performed += OnLeft;
+        input.Snake.Right.performed += OnRight;
 
-        RandomizeFood();
+        isMultiplayer = GameManager.Instance.isMultiplayer;
 
-        lastAddedBodyPart = this.transform;
+        if(isMultiplayer)
+        GameManager.Instance.MultiplayerScoreUpdate(photonView);
     }
 
-    bool inputApplied;
-    private void OnInputChange(InputAction.CallbackContext obj) {
 
-        if(!inputApplied) return;
-
-        Vector2 input = obj.ReadValue<Vector2>();
-        input.x = Mathf.RoundToInt(input.x);
-        input.y = Mathf.RoundToInt(input.y);
-
-
-        // (1, 0) (0, 1) (-1, 0) (0, -1)
-        if(input == (Vector2)snakeDirection){
-            // Debug.Log("Same return");
-            return;
-        } else if(input == (Vector2)(-snakeDirection)) {
-            // Debug.Log("Inverse return");
-            return;
-        }
-        else if (Mathf.Abs(input.x) == Mathf.Abs(input.y)){
-            // Debug.Log("Diagonal return");
-            return;
-        }   
-
-        if(input.x > 0){
-            // Debug.Log("X > 0");
-            nextRotation = Vector3.zero;
-            snakeDirection = input;
-            inputApplied = false;
-        }
-        else if(input.x < 0){
-            // Debug.Log("X < 0");
-            nextRotation = Vector3.forward * 180;
-            snakeDirection = input;
-            inputApplied = false;
-        }
-        else if(input.y > 0){
-            // Debug.Log("Y > 0");
-            nextRotation = Vector3.forward * 90;
-            snakeDirection = input;
-            inputApplied = false;
-        }
-        else if(input.y < 0){
-            // Debug.Log("Y < 0");
-            nextRotation = Vector3.forward * 270;
-            snakeDirection = input;
-            inputApplied = false;
-        }
+    private void OnRight(InputAction.CallbackContext obj)
+    {
+        if(currentDirection == Direction.Left) return;
+        nextRotation = Vector3.zero;
+        currentDirection = Direction.Right;
     }
+
+    private void OnLeft(InputAction.CallbackContext obj)
+    {
+        if(currentDirection == Direction.Right) return; 
+        nextRotation = Vector3.forward * 180;
+        currentDirection = Direction.Left;
+    }
+
+    private void OnDown(InputAction.CallbackContext obj)
+    {
+        if(currentDirection == Direction.Up) return;
+        nextRotation = Vector3.forward * 270;
+        currentDirection = Direction.Down;
+    }
+
+    private void OnUp(InputAction.CallbackContext obj)
+    {
+        if(currentDirection == Direction.Down) return;
+        nextRotation = Vector3.forward * 90;
+        currentDirection = Direction.Up;
+    }
+
 
     void FixedUpdate() {
         // start move from last to first body part
@@ -110,25 +122,40 @@ public class Snake : MonoBehaviour
         }
 
         //Head move forward 1 step each frame
-        transform.rotation = Quaternion.Euler(nextRotation);
-        transform.position = transform.position + transform.right * snakSpeed;
-        inputApplied = true;
+        if(photonView.IsMine || !isMultiplayer){
+            transform.rotation = Quaternion.Euler(nextRotation);
+            transform.position = transform.position + transform.right * snakSpeed;
+        }
     }
 
     private void OnTriggerEnter2D(Collider2D other) {
         if(other.gameObject.CompareTag("Food")){
-            RandomizeFood();
+            GameManager.Instance.RandomizeFood();
             IncreaseSnakeLength();
+
+            if(isMultiplayer)
+                onFoodEat_m.Invoke(photonView);
+            else
+                onFoodEat.Invoke();
         }
         else if(other.gameObject.CompareTag("Danger")){
-            onHitDanger.Invoke();
-        }
-    }
+            try{
+                //If its is no my body part then return
+                if(other.gameObject.GetComponent<SnakeBody>().myHead.gameObject.name != gameObject.name) return;
+            }
+            catch(Exception e){}
 
-    void RandomizeFood() {
-        food.transform.position = new Vector2(
-            UnityEngine.Random.Range(LevelRange_x.x, LevelRange_x.y),
-            UnityEngine.Random.Range(LevelRange_y.x, LevelRange_y.y));
+            Debug.Log("<color=red>Denger is : </color>" + other.gameObject.name);
+
+            if(isMultiplayer)
+                PhotonNetwork.RaiseEvent(GameManager.GAME_OVER, null, RaiseEventOptions.Default, SendOptions.SendUnreliable);
+            else
+                onHitDanger.Invoke();
+
+            if(NetworkManager.Instance.isHost){
+                GameManager.Instance.OnMultiplayerOver();
+            }
+        }
     }
 
     void IncreaseSnakeLength() {
@@ -143,7 +170,12 @@ public class Snake : MonoBehaviour
 
         lastAddedBodyPart = Instantiate(snakeBodyPrefab, spawnPos, Quaternion.identity).transform;
         parts.Add(lastAddedBodyPart.gameObject);
-
-        onFoodEat.Invoke();
     }
+}
+
+public enum Direction{
+    Up,
+    Down,
+    Left,
+    Right
 }

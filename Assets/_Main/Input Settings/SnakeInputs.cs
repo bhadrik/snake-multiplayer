@@ -35,6 +35,42 @@ public partial class @SnakeInputs : IInputActionCollection2, IDisposable
                     ""processors"": ""NormalizeVector2"",
                     ""interactions"": """",
                     ""initialStateCheck"": true
+                },
+                {
+                    ""name"": ""Up"",
+                    ""type"": ""Button"",
+                    ""id"": ""cd346024-3f30-4670-acad-0582671a5124"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Down"",
+                    ""type"": ""Button"",
+                    ""id"": ""ae0dab74-d96f-4572-8168-5f48896d7af9"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Left"",
+                    ""type"": ""Button"",
+                    ""id"": ""5e8eb163-d3d6-4f48-af9e-5078280f2d7a"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Right"",
+                    ""type"": ""Button"",
+                    ""id"": ""4e23fcca-af2c-4286-a711-631ff865fce5"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -103,6 +139,94 @@ public partial class @SnakeInputs : IInputActionCollection2, IDisposable
                     ""action"": ""Joystick"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""1ee344b3-fc3d-40aa-b874-08fe36145a1a"",
+                    ""path"": ""<Gamepad>/leftStick/up"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Up"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""290169aa-db89-4c7f-a710-b20ab2dda2aa"",
+                    ""path"": ""<Keyboard>/w"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Up"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""b521500f-4882-40b7-be6a-8758e2278196"",
+                    ""path"": ""<Gamepad>/leftStick/down"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Down"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""7e4505e6-fb13-45f8-a3a7-9b026b8f7dbd"",
+                    ""path"": ""<Keyboard>/s"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Down"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""6363d8da-fe1e-4b20-8479-18a765f728ee"",
+                    ""path"": ""<Gamepad>/leftStick/left"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Left"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""5d8472f5-f346-4386-8cdf-12d14705ca11"",
+                    ""path"": ""<Keyboard>/a"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Left"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""dc26d630-184b-407c-a07d-1f290c0d94be"",
+                    ""path"": ""<Gamepad>/leftStick/right"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Right"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""3eb7e2c8-2ae7-4ecf-bdff-c62da62a4fa6"",
+                    ""path"": ""<Keyboard>/d"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Right"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -112,6 +236,10 @@ public partial class @SnakeInputs : IInputActionCollection2, IDisposable
         // Snake
         m_Snake = asset.FindActionMap("Snake", throwIfNotFound: true);
         m_Snake_Joystick = m_Snake.FindAction("Joystick", throwIfNotFound: true);
+        m_Snake_Up = m_Snake.FindAction("Up", throwIfNotFound: true);
+        m_Snake_Down = m_Snake.FindAction("Down", throwIfNotFound: true);
+        m_Snake_Left = m_Snake.FindAction("Left", throwIfNotFound: true);
+        m_Snake_Right = m_Snake.FindAction("Right", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -172,11 +300,19 @@ public partial class @SnakeInputs : IInputActionCollection2, IDisposable
     private readonly InputActionMap m_Snake;
     private ISnakeActions m_SnakeActionsCallbackInterface;
     private readonly InputAction m_Snake_Joystick;
+    private readonly InputAction m_Snake_Up;
+    private readonly InputAction m_Snake_Down;
+    private readonly InputAction m_Snake_Left;
+    private readonly InputAction m_Snake_Right;
     public struct SnakeActions
     {
         private @SnakeInputs m_Wrapper;
         public SnakeActions(@SnakeInputs wrapper) { m_Wrapper = wrapper; }
         public InputAction @Joystick => m_Wrapper.m_Snake_Joystick;
+        public InputAction @Up => m_Wrapper.m_Snake_Up;
+        public InputAction @Down => m_Wrapper.m_Snake_Down;
+        public InputAction @Left => m_Wrapper.m_Snake_Left;
+        public InputAction @Right => m_Wrapper.m_Snake_Right;
         public InputActionMap Get() { return m_Wrapper.m_Snake; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -189,6 +325,18 @@ public partial class @SnakeInputs : IInputActionCollection2, IDisposable
                 @Joystick.started -= m_Wrapper.m_SnakeActionsCallbackInterface.OnJoystick;
                 @Joystick.performed -= m_Wrapper.m_SnakeActionsCallbackInterface.OnJoystick;
                 @Joystick.canceled -= m_Wrapper.m_SnakeActionsCallbackInterface.OnJoystick;
+                @Up.started -= m_Wrapper.m_SnakeActionsCallbackInterface.OnUp;
+                @Up.performed -= m_Wrapper.m_SnakeActionsCallbackInterface.OnUp;
+                @Up.canceled -= m_Wrapper.m_SnakeActionsCallbackInterface.OnUp;
+                @Down.started -= m_Wrapper.m_SnakeActionsCallbackInterface.OnDown;
+                @Down.performed -= m_Wrapper.m_SnakeActionsCallbackInterface.OnDown;
+                @Down.canceled -= m_Wrapper.m_SnakeActionsCallbackInterface.OnDown;
+                @Left.started -= m_Wrapper.m_SnakeActionsCallbackInterface.OnLeft;
+                @Left.performed -= m_Wrapper.m_SnakeActionsCallbackInterface.OnLeft;
+                @Left.canceled -= m_Wrapper.m_SnakeActionsCallbackInterface.OnLeft;
+                @Right.started -= m_Wrapper.m_SnakeActionsCallbackInterface.OnRight;
+                @Right.performed -= m_Wrapper.m_SnakeActionsCallbackInterface.OnRight;
+                @Right.canceled -= m_Wrapper.m_SnakeActionsCallbackInterface.OnRight;
             }
             m_Wrapper.m_SnakeActionsCallbackInterface = instance;
             if (instance != null)
@@ -196,6 +344,18 @@ public partial class @SnakeInputs : IInputActionCollection2, IDisposable
                 @Joystick.started += instance.OnJoystick;
                 @Joystick.performed += instance.OnJoystick;
                 @Joystick.canceled += instance.OnJoystick;
+                @Up.started += instance.OnUp;
+                @Up.performed += instance.OnUp;
+                @Up.canceled += instance.OnUp;
+                @Down.started += instance.OnDown;
+                @Down.performed += instance.OnDown;
+                @Down.canceled += instance.OnDown;
+                @Left.started += instance.OnLeft;
+                @Left.performed += instance.OnLeft;
+                @Left.canceled += instance.OnLeft;
+                @Right.started += instance.OnRight;
+                @Right.performed += instance.OnRight;
+                @Right.canceled += instance.OnRight;
             }
         }
     }
@@ -203,5 +363,9 @@ public partial class @SnakeInputs : IInputActionCollection2, IDisposable
     public interface ISnakeActions
     {
         void OnJoystick(InputAction.CallbackContext context);
+        void OnUp(InputAction.CallbackContext context);
+        void OnDown(InputAction.CallbackContext context);
+        void OnLeft(InputAction.CallbackContext context);
+        void OnRight(InputAction.CallbackContext context);
     }
 }
