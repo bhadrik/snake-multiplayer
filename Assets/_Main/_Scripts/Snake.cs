@@ -105,7 +105,7 @@ public class Snake : MonoBehaviour
         }
 
         if(parts.Count > 0){
-            parts[0].transform.position = transform.position;
+            parts[0].transform.position = transform.position /* - (snakeDirection * 0.05f/2) */;
             parts[0].transform.localRotation = transform.localRotation;
         }
 
@@ -137,7 +137,7 @@ public class Snake : MonoBehaviour
 
         //For first body part
         if(parts.Count == 0){
-            spawnPos = transform.position - (transform.right * snakSpeed);
+            spawnPos = transform.position - (transform.right * (snakSpeed /* + 0.05f/2 */));
             spawnRot = transform.localRotation;
         }
 
