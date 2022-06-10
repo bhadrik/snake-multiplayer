@@ -144,9 +144,4 @@ public class NetworkManager : MonoBehaviourPunCallbacks
     public void JoinSelectedRoom(){
         PhotonNetwork.JoinRoom(RoomSelector.Instance.GetSelectedRoomName());
     }
-    
-    public void Disconnect(){
-        // PhotonNetwork.LeaveRoom();
-        // PhotonNetwork.LeaveLobby();
-    }
 }

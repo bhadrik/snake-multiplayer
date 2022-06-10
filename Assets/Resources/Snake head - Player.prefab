@@ -17,7 +17,7 @@ GameObject:
   - component: {fileID: 1020595670881849046}
   m_Layer: 0
   m_Name: Snake head - Player
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -107,13 +107,12 @@ MonoBehaviour:
   onHitDanger:
     m_PersistentCalls:
       m_Calls: []
-  onFoodEat:
-    m_PersistentCalls:
-      m_Calls: []
   onFoodEat_m:
     m_PersistentCalls:
       m_Calls: []
   isMultiplayer: 1
+  parts: []
+  randId: 0
 --- !u!50 &3850523458079327679
 Rigidbody2D:
   serializedVersion: 4

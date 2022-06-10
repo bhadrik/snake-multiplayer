@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using ExitGames.Client.Photon;
 using Photon.Pun;
 using Photon.Realtime;
@@ -11,14 +12,19 @@ public class GameManager : MonoBehaviour
     public static GameManager Instance;
     
     
-    public const byte GAME_START_EVENT = 53;
+    public const byte GAME_START_EVENT = 22;
     public const byte GAME_OVER = 23;
+    public const byte FOOD_EAT_HOST = 24;
+    public const byte FOOD_EAT_OTHER = 25;
+    public const byte NEW_GAME = 43;
 
-    private Snake player;
-    private GameObject food;
+    private Snake myPlayer;
+    private Snake otherPlayer;
+    // private GameObject food;
 
     [SerializeField] private GameObject playerPrefab;
     [SerializeField] private GameObject foodPrefab;
+    [SerializeField] private Food food;
 
 
     [Header("UI")]
@@ -39,16 +45,13 @@ public class GameManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI otherScoreText_end;
     [SerializeField] private GameObject win;
     [SerializeField] private GameObject lost;
+    [SerializeField] private GameObject restartButton;
+
     
-    private int myScore;
-    private int otherScore;
+    private int myScore = -1;
+    private int otherScore = -1;
 
-
-    [Header("Food")]
-    [Tooltip("x: min and y: max")]
-    [SerializeField] Vector2 LevelRange_x = new Vector2(-8, 8);
-    [SerializeField] Vector2 LevelRange_y = new Vector2(-4, 4);
-
+    public int myPlayerRandId;
 
     int highestScore;
     int score;
@@ -76,7 +79,7 @@ public class GameManager : MonoBehaviour
         PhotonNetwork.NetworkingClient.EventReceived += OnNetworkStartEvent;
     }
 
-    private void ScoreUpdate()
+    public void ScoreUpdate()
     {
         score++;
         scoreText.text = score.ToString();
@@ -85,6 +88,8 @@ public class GameManager : MonoBehaviour
             highestScore = score;
             highScoreText.text = "High Score: " + highestScore.ToString();
         }
+        if(myPlayer != null)
+        myPlayer.IncreaseSnakeLength();
     }
 
     private void GameOver()
@@ -97,8 +102,6 @@ public class GameManager : MonoBehaviour
     }
 
     public void RestartGame(){
-        if(isMultiplayer)
-        NetworkManager.Instance.Disconnect();
         SceneManager.LoadSceneAsync(0);
     }
 
@@ -107,6 +110,7 @@ public class GameManager : MonoBehaviour
     public void StartGame(){
         Debug.Log("Click on start button");
         PhotonNetwork.RaiseEvent(GAME_START_EVENT, null, RaiseEventOptions.Default, SendOptions.SendUnreliable);
+
         OnStartGame();
     }
 
@@ -118,46 +122,125 @@ public class GameManager : MonoBehaviour
         singlePlayerScore.SetActive(false);
         multiplayerScoreGroup.SetActive(true);
 
+        myScore = 0;
+        hostScoreText.text = "My Score: " + myScore.ToString();
+
+        otherScore = 0;
+        otherScoreText.text = "Other Score: " + otherScore.ToString();
+
         Transform t;
         if(NetworkManager.Instance.isHost)
         t = startPositions[0];
         else
         t = startPositions[1];
         
-        player = PhotonNetwork.Instantiate(playerPrefab.name, t.position, t.rotation).GetComponent<Snake>();
-        player.onHitDanger.AddListener(GameOver);
-        player.onFoodEat.AddListener(ScoreUpdate);
-        player.onFoodEat_m.AddListener(MultiplayerScoreUpdate);
+        // Application.dataPath+"/Resources/myFile.bytes")
+        myPlayer = PhotonNetwork.Instantiate(playerPrefab.name, t.position, t.rotation).GetComponent<Snake>();
+        myPlayer.onHitDanger.AddListener(GameOver);
+        // player.onFoodEat.AddListener(ScoreUpdate);
+        // player.onFoodEat_m.AddListener(MultiplayerScoreUpdate);
 
         if(NetworkManager.Instance.isHost){
-            food = PhotonNetwork.Instantiate(foodPrefab.name, Vector3.zero, Quaternion.identity);
-            RandomizeFood();
+            food = PhotonNetwork.Instantiate(foodPrefab.name, Vector3.zero, Quaternion.identity).GetComponent<Food>();
         }
     }
 
-    public void MultiplayerScoreUpdate(PhotonView view){
-        if(view.IsMine){
-            myScore++;
-            hostScoreText.text = "My Score: " + myScore.ToString();
 
-            if(myScore > highestScore){
-                highestScore = myScore;
-                highScoreText.text = "High Score: " + highestScore.ToString();
+    public void MultiplayerScoreUpdate(bool byHost){
+        if(NetworkManager.Instance.isHost){
+            //Only host will randomize the food
+            food.Randomize();
+
+            // host player eat food
+            if(!byHost){
+                Debug.Log("<color=green>I eat food</color>");
+                myScore++;
+                hostScoreText.text = "My Score: " + myScore.ToString();
+
+                if(myScore > highestScore){
+                    highestScore = myScore;
+                    highScoreText.text = "High Score: " + highestScore.ToString();
+                }
+                myPlayer.IncreaseSnakeLength();
+            }
+            else{
+                Debug.Log("<color=green>Other eat food</color>");
+                otherScore++;
+                otherScoreText.text = "Other Score: " + otherScore.ToString();
+
+                //Increaese other player length
+                var players = GameObject.FindGameObjectsWithTag("Player");
+                foreach(var player in players){
+                    if(!player.GetComponent<Snake>().isMine){
+                        player.GetComponent<Snake>().IncreaseSnakeLength();
+                    }
+                }
             }
         }
         else{
-            otherScore++;
-            otherScoreText.text = "Other Score" + otherScore.ToString();
+            //Non host player eat food
+            if(byHost){
+                // Debug.Log("<color=green>I eat food</color>");
+                myScore++;
+                hostScoreText.text = "My Score: " + myScore.ToString();
+
+                if(myScore > highestScore){
+                    highestScore = myScore;
+                    highScoreText.text = "High Score: " + highestScore.ToString();
+                }
+                myPlayer.IncreaseSnakeLength();
+            }
+            else{
+                // Debug.Log("<color=green>Other eat food</color>");
+                otherScore++;
+                otherScoreText.text = "Other Score: " + otherScore.ToString();
+                
+                //Increaese other player length
+                var players = GameObject.FindGameObjectsWithTag("Player");
+                foreach(var player in players){
+                    if(!player.GetComponent<Snake>().isMine){
+                        player.GetComponent<Snake>().IncreaseSnakeLength();
+                    }
+                }
+            }
         }
     }
 
-    public void RandomizeFood() {
-        if(!NetworkManager.Instance.isHost && isMultiplayer) return;
+    private void MultiplayerRestart(){
+        myScore = 0;
+        hostScoreText.text = "My Score: " + myScore.ToString();
 
-        food.transform.position = new Vector2(
-            UnityEngine.Random.Range(LevelRange_x.x, LevelRange_x.y),
-            UnityEngine.Random.Range(LevelRange_y.x, LevelRange_y.y));
+        otherScore = 0;
+        otherScoreText.text = "Other Score: " + otherScore.ToString();
+
+        Transform t;
+        if(NetworkManager.Instance.isHost)
+        t = startPositions[0];
+        else
+        t = startPositions[1];
+
+        myPlayer.transform.position = t.position;
+        myPlayer.transform.rotation = t.rotation;
+
+        var players = GameObject.FindGameObjectsWithTag("Player");
+        players[0].GetComponent<Snake>().ResetSnake();
+        players[1].GetComponent<Snake>().ResetSnake();
+
+        players[0].GetComponent<Snake>().RotToDir();
+        players[1].GetComponent<Snake>().RotToDir();
+
+        win.SetActive(false);
+        lost.SetActive(false);
+        multiplayerGameOverPanel.SetActive(false);
     }
+
+
+    public void OnRestartButtonClick(){
+        Debug.Log("NEW_GAME click");
+        PhotonNetwork.RaiseEvent(NEW_GAME, null, RaiseEventOptions.Default, SendOptions.SendUnreliable);
+        MultiplayerRestart();
+    }
+
 
     private void OnNetworkStartEvent(EventData obj)
     {
@@ -166,6 +249,15 @@ public class GameManager : MonoBehaviour
         }
         else if (obj.Code == GAME_OVER){
             OnMultiplayerOver();
+        }
+        else if(obj.Code == FOOD_EAT_HOST){
+            MultiplayerScoreUpdate(true);
+        }
+        else if(obj.Code == FOOD_EAT_OTHER){
+            MultiplayerScoreUpdate(false);
+        }
+        else if(obj.Code == NEW_GAME){
+            MultiplayerRestart();
         }
     }
 
@@ -185,20 +277,36 @@ public class GameManager : MonoBehaviour
             lost.SetActive(true);
         }
 
+        if(!NetworkManager.Instance.isHost)
+            restartButton.SetActive(false);
+
         PlayerPrefs.SetInt("snake_score", highestScore);
-        Time.timeScale = 0;
+
+        var players = GameObject.FindGameObjectsWithTag("Player");
+        players[0].transform.position = new Vector3(100, 100, 0);
+        players[1].transform.position = new Vector3(100, 100, 0);
     }
 
     public void StartSinglePlayer(){
         isMultiplayer = false;
         singlePlayerScore.SetActive(true);
         multiplayerScoreGroup.SetActive(false);
-        player = Instantiate(playerPrefab, Vector3.zero, Quaternion.identity).GetComponent<Snake>();
+        myPlayer = Instantiate(playerPrefab, Vector3.zero, Quaternion.identity).GetComponent<Snake>();
         menuCanvas.SetActive(false);
-        player.onHitDanger.AddListener(GameOver);
-        player.onFoodEat.AddListener(ScoreUpdate);
+        myPlayer.onHitDanger.AddListener(GameOver);
+        // player.onFoodEat.AddListener(ScoreUpdate);
 
-        food = Instantiate(foodPrefab, Vector3.right * 8, Quaternion.identity);
-        RandomizeFood();
+        food = Instantiate(foodPrefab, Vector3.right * 8, Quaternion.identity).GetComponent<Food>();
+    }
+
+
+    bool isPause;
+    public void PauseGame(){
+        if(isPause)
+            Time.timeScale = 1;
+        else
+           Time.timeScale = 0;
+
+        isPause = !isPause;
     }
 }

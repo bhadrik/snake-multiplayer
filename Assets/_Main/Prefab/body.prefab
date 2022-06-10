@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 3819138953176097264}
   - component: {fileID: 3819138953176097265}
   - component: {fileID: 3819138953176097269}
+  - component: {fileID: 726811957245782366}
   m_Layer: 0
   m_Name: body
   m_TagString: Danger
@@ -111,3 +112,16 @@ BoxCollider2D:
   serializedVersion: 2
   m_Size: {x: 0.4, y: 0.4}
   m_EdgeRadius: 0
+--- !u!114 &726811957245782366
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3819138953176097266}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa283f06be7de464baae111615bce662, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  myHead: {fileID: 0}
