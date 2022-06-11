@@ -3,16 +3,13 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class SnakeBody : MonoBehaviour
-{
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
+{    
+    public Snake myHead;
+    public BoxCollider2D mycollider;
 
-    // Update is called once per frame
-    void Update()
-    {
-        
+    private void Awake() {
+        mycollider = GetComponent<BoxCollider2D>();
+        mycollider.enabled = false;
+        // Invoke(nameof(ColliderEnable), 1.0f);
     }
 }

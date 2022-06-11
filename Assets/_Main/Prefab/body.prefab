@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 3819138953176097264}
   - component: {fileID: 3819138953176097265}
   - component: {fileID: 3819138953176097269}
+  - component: {fileID: 726811957245782366}
   m_Layer: 0
   m_Name: body
   m_TagString: Danger
@@ -27,7 +28,7 @@ Transform:
   m_GameObject: {fileID: 3819138953176097266}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 0.9, y: 0.9, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -75,7 +76,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_Sprite: {fileID: 7482667652216324306, guid: 188a1b99653145140ab175df2b88aa9a, type: 3}
-  m_Color: {r: 0.37072492, g: 0.8396226, b: 0.011089312, a: 1}
+  m_Color: {r: 0.38039216, g: 0.8745098, b: 0, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -111,3 +112,16 @@ BoxCollider2D:
   serializedVersion: 2
   m_Size: {x: 0.4, y: 0.4}
   m_EdgeRadius: 0
+--- !u!114 &726811957245782366
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3819138953176097266}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa283f06be7de464baae111615bce662, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  myHead: {fileID: 0}
