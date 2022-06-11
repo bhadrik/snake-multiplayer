@@ -229,6 +229,34 @@ public partial class @SnakeInputs : IInputActionCollection2, IDisposable
                     ""isPartOfComposite"": false
                 }
             ]
+        },
+        {
+            ""name"": ""General"",
+            ""id"": ""0fb885c4-d30d-4180-9937-2ed45c2f8c81"",
+            ""actions"": [
+                {
+                    ""name"": ""Quit"",
+                    ""type"": ""Button"",
+                    ""id"": ""c1665ac3-0910-4cdc-80a8-476546ed33eb"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                }
+            ],
+            ""bindings"": [
+                {
+                    ""name"": """",
+                    ""id"": ""9ff71ed0-671b-4c2c-af74-c1bd3159768e"",
+                    ""path"": ""<Keyboard>/escape"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Quit"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                }
+            ]
         }
     ],
     ""controlSchemes"": []
@@ -240,6 +268,9 @@ public partial class @SnakeInputs : IInputActionCollection2, IDisposable
         m_Snake_Down = m_Snake.FindAction("Down", throwIfNotFound: true);
         m_Snake_Left = m_Snake.FindAction("Left", throwIfNotFound: true);
         m_Snake_Right = m_Snake.FindAction("Right", throwIfNotFound: true);
+        // General
+        m_General = asset.FindActionMap("General", throwIfNotFound: true);
+        m_General_Quit = m_General.FindAction("Quit", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -360,6 +391,39 @@ public partial class @SnakeInputs : IInputActionCollection2, IDisposable
         }
     }
     public SnakeActions @Snake => new SnakeActions(this);
+
+    // General
+    private readonly InputActionMap m_General;
+    private IGeneralActions m_GeneralActionsCallbackInterface;
+    private readonly InputAction m_General_Quit;
+    public struct GeneralActions
+    {
+        private @SnakeInputs m_Wrapper;
+        public GeneralActions(@SnakeInputs wrapper) { m_Wrapper = wrapper; }
+        public InputAction @Quit => m_Wrapper.m_General_Quit;
+        public InputActionMap Get() { return m_Wrapper.m_General; }
+        public void Enable() { Get().Enable(); }
+        public void Disable() { Get().Disable(); }
+        public bool enabled => Get().enabled;
+        public static implicit operator InputActionMap(GeneralActions set) { return set.Get(); }
+        public void SetCallbacks(IGeneralActions instance)
+        {
+            if (m_Wrapper.m_GeneralActionsCallbackInterface != null)
+            {
+                @Quit.started -= m_Wrapper.m_GeneralActionsCallbackInterface.OnQuit;
+                @Quit.performed -= m_Wrapper.m_GeneralActionsCallbackInterface.OnQuit;
+                @Quit.canceled -= m_Wrapper.m_GeneralActionsCallbackInterface.OnQuit;
+            }
+            m_Wrapper.m_GeneralActionsCallbackInterface = instance;
+            if (instance != null)
+            {
+                @Quit.started += instance.OnQuit;
+                @Quit.performed += instance.OnQuit;
+                @Quit.canceled += instance.OnQuit;
+            }
+        }
+    }
+    public GeneralActions @General => new GeneralActions(this);
     public interface ISnakeActions
     {
         void OnJoystick(InputAction.CallbackContext context);
@@ -367,5 +431,9 @@ public partial class @SnakeInputs : IInputActionCollection2, IDisposable
         void OnDown(InputAction.CallbackContext context);
         void OnLeft(InputAction.CallbackContext context);
         void OnRight(InputAction.CallbackContext context);
+    }
+    public interface IGeneralActions
+    {
+        void OnQuit(InputAction.CallbackContext context);
     }
 }

@@ -207,6 +207,34 @@
                     "isPartOfComposite": false
                 }
             ]
+        },
+        {
+            "name": "General",
+            "id": "0fb885c4-d30d-4180-9937-2ed45c2f8c81",
+            "actions": [
+                {
+                    "name": "Quit",
+                    "type": "Button",
+                    "id": "c1665ac3-0910-4cdc-80a8-476546ed33eb",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "9ff71ed0-671b-4c2c-af74-c1bd3159768e",
+                    "path": "<Keyboard>/escape",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Quit",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
         }
     ],
     "controlSchemes": []

@@ -2,8 +2,8 @@
     "m_SelectedDeviceId": "ea3b3c2",
     "m_SelectedPackage": {
         "deviceId": "ea3b3c2",
-        "name": "com.DefaultCompany.snakegame",
-        "processId": 18489,
+        "name": "com.bhadrik.snakegame",
+        "processId": 12522,
         "exited": false
     },
     "m_SelectedPriority": 0,
@@ -12,6 +12,12 @@
             "deviceId": "ea3b3c2",
             "name": "com.DefaultCompany.snakegame",
             "processId": 18489,
+            "exited": true
+        },
+        {
+            "deviceId": "ea3b3c2",
+            "name": "com.bhadrik.snakegame",
+            "processId": 12522,
             "exited": false
         }
     ],

@@ -11,6 +11,8 @@ public class Food : MonoBehaviour
     [SerializeField] Vector2 LevelRange_x = new Vector2(-8, 8);
     [SerializeField] Vector2 LevelRange_y = new Vector2(-4, 4);
 
+    private int count;
+
 
     private void Start() {
         Randomize();
@@ -35,13 +37,34 @@ public class Food : MonoBehaviour
             PhotonNetwork.RaiseEvent(GameManager.FOOD_EAT_OTHER, null, RaiseEventOptions.Default, SendOptions.SendUnreliable);
             GameManager.Instance.MultiplayerScoreUpdate(false);
         }
+
+        count++;
+        Debug.Log("Count: " + count);
+    }
+
+    float difference = 0.5f;
+
+    private void FixedUpdate() {
+        if(count%2 == 0 && NetworkManager.Instance.isHost){
+            // Debug.Log("Moving");
+            if(transform.position.y == LevelRange_y.y)
+                difference = -0.5f;
+            if(transform.position.y == LevelRange_y.x)
+                difference = 0.5f;
+
+            transform.position += Vector3.up * difference;
+        }
     }
 
     public void Randomize(){
         if(!NetworkManager.Instance.isHost && GameManager.Instance.isMultiplayer) return;
 
-        transform.position = new Vector2(
-            UnityEngine.Random.Range(LevelRange_x.x, LevelRange_x.y),
-            UnityEngine.Random.Range(LevelRange_y.x, LevelRange_y.y));
+        float random1 = UnityEngine.Random.Range(LevelRange_x.x, LevelRange_x.y);
+        float random2 = UnityEngine.Random.Range(LevelRange_y.x, LevelRange_y.y);
+
+        float snaped1 = (Mathf.Floor(random1) + Mathf.Ceil(random1))/2;
+        float snaped2 = (Mathf.Floor(random2) + Mathf.Ceil(random2))/2;
+
+        transform.position = new Vector2(snaped1, snaped2);
     }
 }

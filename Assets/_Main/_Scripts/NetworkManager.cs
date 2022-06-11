@@ -18,6 +18,7 @@ public class NetworkManager : MonoBehaviourPunCallbacks
     [SerializeField] private TextMeshProUGUI playerName;
     [SerializeField] private PlayerJoinListController hostList;
     [SerializeField] private PlayerJoinListController nonHostList;
+    [SerializeField] private Button startMultiplayerButton;
 
 
     List<string> playersInRoom = new List<string>();
@@ -34,6 +35,8 @@ public class NetworkManager : MonoBehaviourPunCallbacks
         }
 
         PhotonNetwork.OfflineMode = false;
+
+        startMultiplayerButton.interactable = false;
     }
 
     void Start()
@@ -109,6 +112,10 @@ public class NetworkManager : MonoBehaviourPunCallbacks
         }
 
         hostList.Add(name);
+
+        if(PhotonNetwork.PlayerList.Length > 1){
+            startMultiplayerButton.interactable = true;
+        }
     }
 
     public override void OnPlayerLeftRoom(Player otherPlayer)

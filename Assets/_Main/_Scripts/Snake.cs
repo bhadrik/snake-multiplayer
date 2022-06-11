@@ -7,6 +7,7 @@ using UnityEngine.InputSystem;
 using Photon.Pun;
 using Photon.Realtime;
 using ExitGames.Client.Photon;
+using UnityEngine.UI;
 
 public class Snake : MonoBehaviour
 {
@@ -35,11 +36,14 @@ public class Snake : MonoBehaviour
         }
     }
     Direction currentDirection = Direction.Right;
+    SpriteRenderer sprite;
+
     public int randId;
     
     bool inputApplied;
 
     private void Awake() {
+        sprite = GetComponent<SpriteRenderer>();
         photonView = GetComponent<PhotonView>();
         lastAddedBodyPart = this.transform;
     }
@@ -56,13 +60,20 @@ public class Snake : MonoBehaviour
         input = new SnakeInputs();
         input.Snake.Enable();
         
-        input.Snake.Up.performed += OnUp;
-        input.Snake.Down.performed += OnDown;
-        input.Snake.Left.performed += OnLeft;
-        input.Snake.Right.performed += OnRight;
+        input.Snake.Up.started += OnUp;
+        input.Snake.Down.started += OnDown;
+        input.Snake.Left.started += OnLeft;
+        input.Snake.Right.started += OnRight;
 
         isMultiplayer = GameManager.Instance.isMultiplayer;
 
+
+        if(photonView.IsMine){
+            sprite.color = GameManager.Instance.myPlayerColor;
+        }
+        else{
+            sprite.color = GameManager.Instance.otherPlayerColor;
+        }
         // if(isMultiplayer)
         // GameManager.Instance.MultiplayerScoreUpdate(photonView.IsMine);
     }
@@ -149,13 +160,13 @@ public class Snake : MonoBehaviour
 
         if(!NetworkManager.Instance.isHost) return;
 
-        try{
-            //If its is no my body part then return
-            if(other.gameObject.GetComponent<SnakeBody>().myHead.randId != randId){
-                Debug.Log("<color=yellow>Collide with other player return</color>");
-                return;
-            }
-        }catch{}
+        // try{
+        //     //If its is no my body part then return
+        //     if(other.gameObject.GetComponent<SnakeBody>().myHead.randId != randId){
+        //         Debug.Log("<color=yellow>Collide with other player return</color>");
+        //         return;
+        //     }
+        // }catch{}
 
         //Let both player know game is over
         PhotonNetwork.RaiseEvent(GameManager.GAME_OVER, null, RaiseEventOptions.Default, SendOptions.SendUnreliable);
@@ -174,7 +185,16 @@ public class Snake : MonoBehaviour
 
         var body = Instantiate(snakeBodyPrefab, spawnPos, Quaternion.identity);
         body.GetComponent<SnakeBody>().myHead = this;
-        if(parts.Count > 2) body.GetComponent<SnakeBody>().mycollider.enabled = true;
+
+        if(photonView.IsMine){
+            body.GetComponent<SpriteRenderer>().color = GameManager.Instance.myPlayerColor;
+        }
+        else{
+            body.GetComponent<SpriteRenderer>().color = GameManager.Instance.otherPlayerColor;
+        }
+
+
+        if(parts.Count > 2 && !isMultiplayer) body.GetComponent<SnakeBody>().mycollider.enabled = true;
         lastAddedBodyPart = body.transform;
         parts.Add(lastAddedBodyPart.gameObject);
     }

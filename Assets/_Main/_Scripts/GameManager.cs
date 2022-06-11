@@ -1,16 +1,17 @@
 using System;
 using System.Collections;
+using System.IO;
 using ExitGames.Client.Photon;
 using Photon.Pun;
 using Photon.Realtime;
 using TMPro;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
     public static GameManager Instance;
-    
     
     public const byte GAME_START_EVENT = 22;
     public const byte GAME_OVER = 23;
@@ -22,10 +23,13 @@ public class GameManager : MonoBehaviour
     private Snake otherPlayer;
     // private GameObject food;
 
+    [Header("General")]
     [SerializeField] private GameObject playerPrefab;
     [SerializeField] private GameObject foodPrefab;
     [SerializeField] private Food food;
 
+    [SerializeField] public Color myPlayerColor;
+    [SerializeField] public Color otherPlayerColor;
 
     [Header("UI")]
     [SerializeField] private GameObject gameOverPopup;
@@ -36,6 +40,8 @@ public class GameManager : MonoBehaviour
 
     
     [Header("Multiplayer")]
+    [SerializeField] private int gameTime = 90;
+    [SerializeField] private TextMeshProUGUI timerText;
     [SerializeField] private GameObject multiplayerGameOverPanel;
     [SerializeField] private GameObject multiplayerScoreGroup;
     [SerializeField] private GameObject singlePlayerScore;
@@ -77,6 +83,16 @@ public class GameManager : MonoBehaviour
         ScoreUpdate();
 
         PhotonNetwork.NetworkingClient.EventReceived += OnNetworkStartEvent;
+
+        var input = new SnakeInputs();
+        input.General.Enable();
+        input.General.Quit.performed += OnQuit;
+
+    }
+
+    private void OnQuit(InputAction.CallbackContext obj)
+    {
+        Application.Quit();
     }
 
     public void ScoreUpdate()
@@ -110,7 +126,6 @@ public class GameManager : MonoBehaviour
     public void StartGame(){
         Debug.Log("Click on start button");
         PhotonNetwork.RaiseEvent(GAME_START_EVENT, null, RaiseEventOptions.Default, SendOptions.SendUnreliable);
-
         OnStartGame();
     }
 
@@ -124,24 +139,46 @@ public class GameManager : MonoBehaviour
 
         myScore = 0;
         hostScoreText.text = "My Score: " + myScore.ToString();
+        hostScoreText.color = myPlayerColor;
 
         otherScore = 0;
         otherScoreText.text = "Other Score: " + otherScore.ToString();
+        otherScoreText.color = otherPlayerColor;
 
         Transform t;
         if(NetworkManager.Instance.isHost)
         t = startPositions[0];
         else
         t = startPositions[1];
-        
-        // Application.dataPath+"/Resources/myFile.bytes")
-        myPlayer = PhotonNetwork.Instantiate(playerPrefab.name, t.position, t.rotation).GetComponent<Snake>();
+
+        string path = "Photon prefab/Snake head - Player";
+        myPlayer = PhotonNetwork.Instantiate(path, t.position, t.rotation).GetComponent<Snake>();
         myPlayer.onHitDanger.AddListener(GameOver);
         // player.onFoodEat.AddListener(ScoreUpdate);
         // player.onFoodEat_m.AddListener(MultiplayerScoreUpdate);
 
         if(NetworkManager.Instance.isHost){
-            food = PhotonNetwork.Instantiate(foodPrefab.name, Vector3.zero, Quaternion.identity).GetComponent<Food>();
+            path = "Photon prefab/Food";
+            food = PhotonNetwork.Instantiate(path, Vector3.zero, Quaternion.identity).GetComponent<Food>();
+        }
+
+        StartCoroutine(StartTimer());
+    }
+
+    float timer = 0;
+    IEnumerator StartTimer(){
+        while(timer <= gameTime){
+            timer += Time.deltaTime;
+
+            timerText.text = "Time: " + (gameTime - Mathf.Floor(timer));
+
+            yield return null;
+        }
+
+        //After timer end
+        if(NetworkManager.Instance.isHost){
+            OnMultiplayerOver();
+            PhotonNetwork.RaiseEvent(GameManager.GAME_OVER, null, RaiseEventOptions.Default, SendOptions.SendUnreliable);
         }
     }
 
@@ -232,6 +269,10 @@ public class GameManager : MonoBehaviour
         win.SetActive(false);
         lost.SetActive(false);
         multiplayerGameOverPanel.SetActive(false);
+
+        StopAllCoroutines();
+        timer = 0;
+        StartCoroutine(StartTimer());
     }
 
 
@@ -297,6 +338,7 @@ public class GameManager : MonoBehaviour
         // player.onFoodEat.AddListener(ScoreUpdate);
 
         food = Instantiate(foodPrefab, Vector3.right * 8, Quaternion.identity).GetComponent<Food>();
+        timerText.gameObject.SetActive(false);
     }
 
 
