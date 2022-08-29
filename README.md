@@ -5,14 +5,14 @@ Old game but with new mode "MULTIPLAYER"
 
 #### Multiplayer learning project
 
-![img 1](/Screenshots/img1.png)
+![img 1](/Screenshots/Img1.png)
 
-![img 2](/Screenshots/img2.png)
+![img 2](/Screenshots/Img2.png)
 
-![img 3](/Screenshots/img3.png)
+![img 3](/Screenshots/Img3.png)
 
-![img 4](/Screenshots/img4.png)
+![img 4](/Screenshots/Img4.png)
 
-![img 5](/Screenshots/img5.png)
+![img 5](/Screenshots/Img5.png)
 
-![img 6](/Screenshots/img6.png)
+![img 6](/Screenshots/Img6.png)
